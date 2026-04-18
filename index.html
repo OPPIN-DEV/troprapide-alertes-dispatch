@@ -5,6 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TropRapide — Livraison Express Abidjan</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <style>
     :root {
       --bg: #000;
@@ -413,24 +415,32 @@
   </div>
 
   <script>
-    // Lecture des stats depuis localStorage
-    const DB_KEY = 'troprapide_delivery';
-    function loadStats() {
-      try {
-        const db = JSON.parse(localStorage.getItem(DB_KEY)) || {};
-        const orders = Object.values(db.orders || {});
-        const drivers = Object.values(db.drivers || {});
-        const active = orders.filter(o => !['livree'].includes(o.status)).length;
-        const dispo = drivers.filter(d => d.status === 'available').length;
-        const done = orders.filter(o => o.status === 'livree').length;
-        document.getElementById('live-orders').textContent = active;
-        document.getElementById('live-drivers').textContent = dispo;
-        document.getElementById('live-done').textContent = done;
-      } catch (e) { }
-    }
-    loadStats();
-    setInterval(loadStats, 5000);
-    window.addEventListener('storage', e => { if (e.key === DB_KEY) loadStats(); });
+    /* ============================================================
+       FIREBASE CONFIGURATION
+       ============================================================ */
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0FL4ua8NUWKfwu_gGUL5TI1RkiNbBZnU",
+      authDomain: "troprapide-821a7.firebaseapp.com",
+      databaseURL: "https://troprapide-821a7-default-rtdb.firebaseio.com",
+      projectId: "troprapide-821a7"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const rtdb = firebase.database();
+
+    /* ============================================================
+       LIVE STATS (read-only Firebase listener)
+       ============================================================ */
+    rtdb.ref('/').on('value', snap => {
+      const db = snap.val() || {};
+      const orders = Object.values(db.orders || {});
+      const drivers = Object.values(db.drivers || {});
+      const active = orders.filter(o => o.status !== 'livree' && o.status !== 'annulee').length;
+      const dispo = drivers.filter(d => d.status === 'available').length;
+      const done = orders.filter(o => o.status === 'livree').length;
+      document.getElementById('live-orders').textContent = active;
+      document.getElementById('live-drivers').textContent = dispo;
+      document.getElementById('live-done').textContent = done;
+    });
   </script>
 
 </body>
