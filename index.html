@@ -362,7 +362,7 @@
     <!-- Cards -->
     <div class="cards">
 
-      <a class="card card-admin" href="admin.html">
+      <a class="card card-admin" href="https://admin.troprapide.com/">
         <span class="card-icon">⚡</span>
         <div class="card-title">Admin Panel</div>
         <div class="card-desc">
@@ -371,7 +371,7 @@
         <div class="card-tag">Ouvrir le panneau admin</div>
       </a>
 
-      <a class="card card-driver" href="driver.html">
+      <a class="card card-driver" href="https://livreur.troprapide.com/">
         <span class="card-icon">🏍️</span>
         <div class="card-title">App Livreur</div>
         <div class="card-desc">
@@ -380,7 +380,7 @@
         <div class="card-tag">Accéder à l'espace livreur</div>
       </a>
 
-      <a class="card card-stats" href="stats.html">
+      <a class="card card-stats" href="https://stats.troprapide.com/">
         <span class="card-icon">📊</span>
         <div class="card-title">Statistiques</div>
         <div class="card-desc">
@@ -430,17 +430,16 @@
     /* ============================================================
        LIVE STATS (read-only Firebase listener)
        ============================================================ */
-    rtdb.ref('/').on('value', snap => {
-      const db = snap.val() || {};
-      const orders = Object.values(db.orders || {});
-      const drivers = Object.values(db.drivers || {});
-      const active = orders.filter(o => o.status !== 'livree' && o.status !== 'annulee').length;
-      const dispo = drivers.filter(d => d.status === 'available').length;
-      const done = orders.filter(o => o.status === 'livree').length;
-      document.getElementById('live-orders').textContent = active;
-      document.getElementById('live-drivers').textContent = dispo;
-      document.getElementById('live-done').textContent = done;
-    });
+    let _dispatchOrders = {}, _dispatchDrivers = {};
+    function updateDispatchStats() {
+      const orders = Object.values(_dispatchOrders);
+      const drivers = Object.values(_dispatchDrivers);
+      document.getElementById('live-orders').textContent = orders.filter(o => o.status !== 'livree' && o.status !== 'annulee').length;
+      document.getElementById('live-drivers').textContent = drivers.filter(d => d.status === 'available').length;
+      document.getElementById('live-done').textContent = orders.filter(o => o.status === 'livree').length;
+    }
+    rtdb.ref('/orders').on('value', snap => { _dispatchOrders = snap.val() || {}; updateDispatchStats(); }, () => {});
+    rtdb.ref('/drivers').on('value', snap => { _dispatchDrivers = snap.val() || {}; updateDispatchStats(); }, () => {});
   </script>
 
 </body>
