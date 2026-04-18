@@ -439,7 +439,7 @@
       document.getElementById('live-done').textContent = orders.filter(o => o.status === 'livree').length;
     }
     rtdb.ref('/orders').on('value', snap => { _dispatchOrders = snap.val() || {}; updateDispatchStats(); }, () => {});
-    rtdb.ref('/drivers').on('value', snap => { _dispatchDrivers = snap.val() || {}; updateDispatchStats(); }, () => {});
+    rtdb.ref('/livreurs').on('value', snap => { _dispatchDrivers = snap.val() || {}; updateDispatchStats(); }, () => {});
   </script>
 
 </body>
